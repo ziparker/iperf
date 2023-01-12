@@ -160,8 +160,9 @@ client_reporter_timer_proc(TimerClientData client_data, struct iperf_time *nowP)
 
     if (test->done)
         return;
+
     if (test->reporter_callback)
-	test->reporter_callback(test);
+        test->reporter_callback(test);
 }
 
 static int
@@ -323,15 +324,18 @@ iperf_handle_message_client(struct iperf_test *test)
         case SERVER_TERMINATE:
             i_errno = IESERVERTERM;
 
-	    /*
-	     * Temporarily be in DISPLAY_RESULTS phase so we can get
-	     * ending summary statistics.
-	     */
-	    signed char oldstate = test->state;
-	    cpu_util(test->cpu_util);
-	    test->state = DISPLAY_RESULTS;
-	    test->reporter_callback(test);
-	    test->state = oldstate;
+            /*
+             * Temporarily be in DISPLAY_RESULTS phase so we can get
+             * ending summary statistics.
+             */
+            signed char oldstate = test->state;
+            cpu_util(test->cpu_util);
+            test->state = DISPLAY_RESULTS;
+
+            if (test->reporter_callback)
+                test->reporter_callback(test);
+
+            test->state = oldstate;
             return -1;
         case ACCESS_DENIED:
             i_errno = IEACCESSDENIED;
@@ -491,7 +495,8 @@ iperf_client_end(struct iperf_test *test)
     }
 
     /* show final summary */
-    test->reporter_callback(test);
+    if (test->reporter_callback)
+        test->reporter_callback(test);
 
     /* Send response only if no error in server */
     if (test->state > 0) {

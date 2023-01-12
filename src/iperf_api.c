@@ -242,6 +242,12 @@ iperf_get_test_socket_bufsize(struct iperf_test *ipt)
     return ipt->settings->socket_bufsize;
 }
 
+iperf_reporter_callback_t
+iperf_get_test_reporter_callback(struct iperf_test* ipt)
+{
+    return ipt->reporter_callback;
+}
+
 double
 iperf_get_test_reporter_interval(struct iperf_test *ipt)
 {
@@ -429,6 +435,12 @@ iperf_get_mapped_v4(struct iperf_test* ipt)
     return ipt->mapped_v4;
 }
 
+void*
+iperf_get_test_callback_user_p(struct iperf_test* ipt)
+{
+    return ipt->callback_user_p;
+}
+
 /************** Setter routines for some fields inside iperf_test *************/
 
 void
@@ -453,6 +465,12 @@ void
 iperf_set_test_duration(struct iperf_test *ipt, int duration)
 {
     ipt->duration = duration;
+}
+
+void
+iperf_set_test_reporter_callback(struct iperf_test* ipt, iperf_reporter_callback_t cb)
+{
+    ipt->reporter_callback = cb;
 }
 
 void
@@ -585,6 +603,12 @@ void
 iperf_set_mapped_v4(struct iperf_test *ipt, const int val)
 {
     ipt->mapped_v4 = val;
+}
+
+void
+iperf_set_test_callback_user_p(struct iperf_test* ipt, void* p)
+{
+    ipt->callback_user_p = p;
 }
 
 static void
@@ -2801,6 +2825,8 @@ iperf_defaults(struct iperf_test *testp)
 
     testp->stats_callback = iperf_stats_callback;
     testp->reporter_callback = iperf_reporter_callback;
+
+    testp->callback_user_p = NULL;
 
     testp->stats_interval = testp->reporter_interval = 1;
     testp->num_streams = 1;
