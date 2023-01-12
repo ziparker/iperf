@@ -34,6 +34,9 @@
 #ifdef HAVE_STDINT_H
 #include <stdint.h>
 #endif
+
+#include "iperf_api_types.h"
+
 #ifdef __cplusplus
 extern "C" { /* open extern "C" */
 #endif
@@ -111,8 +114,6 @@ typedef uint64_t iperf_size_t;
 #define ACCESS_DENIED (-1)
 #define SERVER_ERROR (-2)
 
-typedef void (*iperf_reporter_callback_t)(struct iperf_test *);
-
 /* Getter routines for some fields inside iperf_test. */
 int	iperf_get_verbose( struct iperf_test* ipt );
 int	iperf_get_control_socket( struct iperf_test* ipt );
@@ -166,6 +167,7 @@ void	iperf_set_test_omit( struct iperf_test* ipt, int omit );
 void	iperf_set_test_duration( struct iperf_test* ipt, int duration );
 void    iperf_set_test_reporter_callback( struct iperf_test* ipt, iperf_reporter_callback_t cb );
 void	iperf_set_test_reporter_interval( struct iperf_test* ipt, double reporter_interval );
+void    iperf_set_test_reporter_intermediate_results_callback( struct iperf_test* ipt, iperf_intermediate_results_callback_t cb );
 void	iperf_set_test_stats_interval( struct iperf_test* ipt, double stats_interval );
 void	iperf_set_test_state( struct iperf_test* ipt, signed char state );
 void	iperf_set_test_blksize( struct iperf_test* ipt, int blksize );

@@ -5,7 +5,7 @@ noinst_PROGRAMS         = t_timer t_units t_uuid t_api t_auth iperf3_profile   #
 else
 noinst_PROGRAMS         = t_timer t_units t_uuid t_api t_auth                  # Build, but don't install the test programs
 endif
-include_HEADERS         = iperf_api.h                                   # Defines the headers that get installed with the program
+include_HEADERS         = iperf_api.h iperf_api_types.h                 # Defines the headers that get installed with the program
 
 
 # Specify the source files and flags for the iperf library
@@ -16,6 +16,7 @@ libiperf_la_SOURCES     = \
                         iperf.h \
                         iperf_api.c \
                         iperf_api.h \
+                        iperf_api_types.h \
                         iperf_error.c \
                         iperf_auth.h \
                         iperf_auth.c \

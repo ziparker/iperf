@@ -474,6 +474,12 @@ iperf_set_test_reporter_callback(struct iperf_test* ipt, iperf_reporter_callback
 }
 
 void
+iperf_set_test_reporter_intermediate_results_callback(struct iperf_test* ipt, iperf_intermediate_results_callback_t cb)
+{
+    ipt->intermediate_results_callback = cb;
+}
+
+void
 iperf_set_test_reporter_interval(struct iperf_test *ipt, double reporter_interval)
 {
     ipt->reporter_interval = reporter_interval;
@@ -3473,16 +3479,17 @@ iperf_print_intermediate(struct iperf_test *test)
             sp = SLIST_FIRST(&test->streams); /* reset back to 1st stream */
             /* Only do this of course if there was a first stream */
             if (sp) {
-	    irp = TAILQ_LAST(&sp->result->interval_results, irlisthead);    /* use 1st stream for timing info */
+                irp = TAILQ_LAST(&sp->result->interval_results, irlisthead);    /* use 1st stream for timing info */
 
-	    unit_snprintf(ubuf, UNIT_LEN, (double) bytes, 'A');
-	    bandwidth = (double) bytes / (double) irp->interval_duration;
-	    unit_snprintf(nbuf, UNIT_LEN, bandwidth, test->settings->unit_format);
+                unit_snprintf(ubuf, UNIT_LEN, (double) bytes, 'A');
+                bandwidth = (double) bytes / (double) irp->interval_duration;
+                unit_snprintf(nbuf, UNIT_LEN, bandwidth, test->settings->unit_format);
 
-	    iperf_time_diff(&sp->result->start_time,&irp->interval_start_time, &temp_time);
-	    start_time = iperf_time_in_secs(&temp_time);
-	    iperf_time_diff(&sp->result->start_time,&irp->interval_end_time, &temp_time);
-	    end_time = iperf_time_in_secs(&temp_time);
+                iperf_time_diff(&sp->result->start_time,&irp->interval_start_time, &temp_time);
+                start_time = iperf_time_in_secs(&temp_time);
+                iperf_time_diff(&sp->result->start_time,&irp->interval_end_time, &temp_time);
+                end_time = iperf_time_in_secs(&temp_time);
+
                 if (test->protocol->id == Ptcp || test->protocol->id == Psctp) {
                     if (test->sender_has_retransmits == 1 && stream_must_be_sender) {
                         /* Interval sum, TCP with retransmits. */
@@ -4158,8 +4165,36 @@ print_interval_results(struct iperf_test *test, struct iperf_stream *sp, cJSON *
     iperf_time_diff(&sp->result->start_time, &irp->interval_end_time, &temp_time);
     et = iperf_time_in_secs(&temp_time);
 
+    if (test->intermediate_results_callback) {
+        const struct iperf_intermediate_results report = {
+            .bitrate = bandwidth * 8,
+            .start_time = st,
+            .end_time = et,
+            .interval_time = irp->interval_duration,
+            .jitter_ms = irp->jitter * 1000.0,
+            .lost_pct = irp->interval_packet_count > 0
+                ? 100.0 * irp->interval_cnt_error / irp->interval_packet_count : 0.0,
+            .bytes_transferred = irp->bytes_transferred,
+            .lost_packets = irp->interval_cnt_error,
+            .omitted = irp->omitted,
+            .packets = irp->interval_packet_count,
+            .path_mtu = irp->pmtu,
+            .retransmissions = irp->interval_retrans,
+            .rtt = irp->rtt,
+            .rtt_var = irp->rttvar,
+            .send_cwnd = irp->snd_cwnd,
+            .send_wnd = irp->snd_wnd,
+            .protocol = test->protocol->id,
+            .socket = sp->socket,
+            .is_sender = sp->sender,
+        };
+
+        test->intermediate_results_callback(test, &report);
+    }
+
     if (test->protocol->id == Ptcp || test->protocol->id == Psctp) {
 	if (test->sender_has_retransmits == 1 && sp->sender) {
+
 	    /* Interval, TCP with retransmits. */
 	    if (test->json_output)
 		cJSON_AddItemToArray(json_interval_streams, iperf_json_printf("socket: %d  start: %f  end: %f  seconds: %f  bytes: %d  bits_per_second: %f  retransmits: %d  snd_cwnd:  %d  snd_wnd:  %d  rtt:  %d  rttvar: %d  pmtu: %d  omitted: %b sender: %b", (int64_t) sp->socket, (double) st, (double) et, (double) irp->interval_duration, (int64_t) irp->bytes_transferred, bandwidth * 8, (int64_t) irp->interval_retrans, (int64_t) irp->snd_cwnd, (int64_t) irp->snd_wnd, (int64_t) irp->rtt, (int64_t) irp->rttvar, (int64_t) irp->pmtu, irp->omitted, sp->sender));

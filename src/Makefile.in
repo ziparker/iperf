@@ -163,7 +163,7 @@ iperf3_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) \
 	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(iperf3_CFLAGS) $(CFLAGS) \
 	$(iperf3_LDFLAGS) $(LDFLAGS) -o $@
 am__iperf3_profile_SOURCES_DIST = main.c cjson.c cjson.h flowlabel.h \
-	iperf.h iperf_api.c iperf_api.h iperf_error.c iperf_auth.h \
+	iperf.h iperf_api.c iperf_api.h iperf_api_types.h iperf_error.c iperf_auth.h \
 	iperf_auth.c iperf_client_api.c iperf_locale.c iperf_locale.h \
 	iperf_server_api.c iperf_tcp.c iperf_tcp.h iperf_udp.c \
 	iperf_udp.h iperf_sctp.c iperf_sctp.h iperf_util.c \
@@ -631,7 +631,7 @@ top_build_prefix = @top_build_prefix@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
 lib_LTLIBRARIES = libiperf.la                                   # Build and install an iperf library
-include_HEADERS = iperf_api.h                                   # Defines the headers that get installed with the program
+include_HEADERS = iperf_api.h iperf_api_types.h                 # Defines the headers that get installed with the program
 
 # Specify the source files and flags for the iperf library
 libiperf_la_SOURCES = \
@@ -641,6 +641,7 @@ libiperf_la_SOURCES = \
                         iperf.h \
                         iperf_api.c \
                         iperf_api.h \
+                        iperf_api_types.h \
                         iperf_error.c \
                         iperf_auth.h \
                         iperf_auth.c \

@@ -73,6 +73,8 @@
 #include <openssl/evp.h>
 #endif // HAVE_SSL
 
+#include "iperf_api_types.h"
+
 #if !defined(__IPERF_API_H)
 typedef uint64_t iperf_size_t;
 #endif // __IPERF_API_H
@@ -346,6 +348,7 @@ struct iperf_test
     Timer     *stats_timer;
     Timer     *reporter_timer;
 
+    void      (*intermediate_results_callback)(struct iperf_test *, const struct iperf_intermediate_results *);
     void      *callback_user_p;
 
     double cpu_util[3];                            /* cpu utilization of the test - total, user, system */
